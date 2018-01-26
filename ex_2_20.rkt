@@ -1,0 +1,10 @@
+#lang racket
+(define (same-parity x . rest)
+  (define (s-p? a b)
+    (or (and (even? a) (even? b))
+        (and (odd? a) (odd? b))))
+  (define (helper l)
+    (cond ((null? l) '())
+          ((s-p? x (car l)) (cons (car l) (helper (cdr l))))
+          (else (helper (cdr l)))))
+  (cons x (helper rest)))
