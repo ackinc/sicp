@@ -1,5 +1,5 @@
 #lang racket
-(provide append enumerate-interval enumerate-tree map filter accumulate accumulate-alt)
+(provide append enumerate-interval enumerate-tree map filter accumulate accumulate-alt flatmap)
 
 (define (append s1 s2)
   (if (null? s1)
@@ -38,3 +38,6 @@
   (if (null? sequence)
       initial
       (op (car sequence) (accumulate-alt op initial (cdr sequence)))))
+
+(define (flatmap proc seq)
+  (accumulate-alt append null (map proc seq)))
