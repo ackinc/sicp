@@ -1,0 +1,71 @@
+#lang racket
+(define (deriv exp v)
+  (cond ((number? exp) 0)
+        ((variable? exp) (if (same-variable? exp v) 1 0))
+        ((sum? exp) (make-sum (deriv (addend exp) v)
+                              (deriv (augend exp) v)))
+        ((product? exp) (make-sum (make-product (multiplicand exp)
+                                                (deriv (multiplier exp) v))
+                                  (make-product (multiplier exp)
+                                                (deriv (multiplicand exp) v))))
+        ; ex 2.56
+        ((pow? exp) (cond ((same-variable? v (exponent exp)) (error "deriv: unimplemented for this type of expression" exp))
+                          (else (let ((b (base exp))
+                                      (e (exponent exp)))
+                                  (make-product (make-product e (make-pow b (make-sum e -1)))
+                                                (deriv b v))))))
+        (else (error "deriv: invalid expression type" exp))))
+
+(define (variable? v) (symbol? v))
+(define (same-variable? v1 v2) (and (variable? v1) (variable? v2) (eq? v1 v2)))
+
+(define (=number? exp num)
+  (and (number? exp) (= exp num)))
+
+(define (make-sum exp1 exp2)
+  (cond ((=number? exp1 0) exp2)
+        ((=number? exp2 0) exp1)
+        ((and (number? exp1) (number? exp2)) (+ exp1 exp2))
+        (else (list '+ exp1 exp2))))
+(define (sum? exp) (and (list? exp) (eq? (car exp) '+)))
+(define (addend sum-exp) (cadr sum-exp))
+;(define (augend sum-exp) (caddr sum-exp))
+
+; ex 2.57
+(define (augend sum-exp)
+  (if (null? (cdddr sum-exp))
+      (caddr sum-exp)
+      (cons '+ (cddr sum-exp))))
+
+(define (make-product exp1 exp2)
+  (cond ((or (=number? exp1 0) (=number? exp2 0)) 0)
+        ((=number? exp1 1) exp2)
+        ((=number? exp2 1) exp1)
+        ((and (number? exp1) (number? exp2)) (* exp1 exp2))
+        (else (list '* exp1 exp2))))
+(define (product? exp) (and (list? exp) (eq? (car exp) '*)))
+(define (multiplier prod-exp) (cadr prod-exp))
+;(define (multiplicand prod-exp) (caddr prod-exp))
+
+; ex 2.57
+(define (multiplicand prod-exp)
+  (if (null? (cdddr prod-exp))
+      (caddr prod-exp)
+      (cons '* (cddr prod-exp))))
+
+(define (square x) (* x x))
+(define (fast-exp b n)
+  (cond ((= n 0) 1)
+        ((even? n) (fast-exp (square b) (/ n 2)))
+        (else (* b (fast-exp b (- n 1))))))
+
+; ex 2.56
+(define (make-pow base exp)
+  (cond ((or (=number? base 0) (=number? base 1)) base)
+        ((=number? exp 0) 1)
+        ((=number? exp 1) base)
+        ((and (number? base) (number? exp)) (fast-exp base exp))
+        (else (list '^ base exp))))
+(define (pow? exp) (and (list? exp) (eq? (car exp) '^)))
+(define (base pow-exp) (cadr pow-exp))
+(define (exponent pow-exp) (caddr pow-exp))
