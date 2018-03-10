@@ -1,5 +1,5 @@
 #lang racket
-(provide list-ref length append map)
+(provide list-ref length append map list-search listmap)
 
 (define (list-ref items n)
   (if (= n 0)
@@ -48,3 +48,13 @@
   (cond ((null? items) null)
         ((not (pair? (car items))) (cons (car items) (fringe (cdr items))))
         (else (append (fringe (car items)) (fringe (cdr items))))))
+
+; the methods below are used in apply-generic-op (ex 2.84 and later)
+(define (list-search item items)
+  (let ((tmp (memq item items)))
+    (if tmp (- (length items) (length tmp)) #f)))
+
+(define (listmap fnlist arglist)
+  (if (or (null? fnlist) (null? arglist))
+      null
+      (cons ((car fnlist) (car arglist)) (listmap (cdr fnlist) (cdr arglist)))))
