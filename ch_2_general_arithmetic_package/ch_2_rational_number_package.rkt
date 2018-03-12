@@ -79,6 +79,13 @@
   (put-coercion '(complex rational) (lambda (n) (tag (make ((get 'real-part 'complex) n) 1))))
   (put 'project 'rational (get-coercion '(rational scheme-number)))
 
+  ; ex 2.86
+  (put 'sin 'rational (lambda (rat) (sin (/ (numer rat) (denom rat)))))
+  (put 'cos 'rational (lambda (rat) (cos (/ (numer rat) (denom rat)))))
+  (put 'atan '(rational rational) (lambda (r1 r2)
+                                    (atan (/ (numer r1) (denom r1)) (/ (numer r2) (denom r2)))))
+  (put 'sqrt 'rational (lambda (rat) (make (sqrt (numer rat)) (sqrt (denom rat)))))
+
   'done)
 
 (install-rational-number-package)

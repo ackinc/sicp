@@ -1,17 +1,19 @@
 #lang racket
 (require "ch_2_type_tag_helpers.rkt")
 (require "ch_2_hash_ops.rkt")
+(require "ch_2_general_arithmetic_ops.rkt")
 
-(define (square x) (* x x))
 (define (install-polar-complex-number-package)
+  ; implementation of public functions
   (define (magnitude z) (car z))
   (define (angle z) (cdr z))
-  (define (real-part z) (* (magnitude z) (cos (angle z))))
-  (define (imag-part z) (* (magnitude z) (sin (angle z))))
+  (define (real-part z) (mul (magnitude z) (cosine (angle z))))
+  (define (imag-part z) (mul (magnitude z) (sine (angle z))))
 
   (define (make-from-mag-ang r a) (cons r a))
-  (define (make-from-real-imag x y) (cons (sqrt (+ (square x) (square y))) (atan y x)))
+  (define (make-from-real-imag x y) (cons (squareroot (add (mul x x) (mul y y))) (arctan y x))) ; sqrt
 
+  ; public interface
   (define (tag datum) (attach-tag 'polar datum))
   (put 'make-from-mag-ang 'polar (lambda (r a) (tag (make-from-mag-ang r a))))
   (put 'make-from-real-imag 'polar (lambda (x y) (tag (make-from-real-imag x y))))

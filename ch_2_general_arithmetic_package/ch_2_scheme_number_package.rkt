@@ -21,6 +21,12 @@
   ; ex 2.85
   (put-coercion '(rational scheme-number) (lambda (rat) (round (/ ((get 'numer 'rational) rat) ((get 'denom 'rational) rat)))))
 
+  ; ex 2.86
+  (put 'cos 'scheme-number cos)
+  (put 'sin 'scheme-number sin)
+  (put 'atan '(scheme-number scheme-number) atan)
+  (put 'sqrt 'scheme-number sqrt)
+
   'done)
 
 (install-scheme-number-package)
