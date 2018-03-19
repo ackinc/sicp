@@ -1,5 +1,5 @@
 #lang racket
-(provide list-ref length append map list-search listmap)
+(provide list-ref length append map list-search listmap list-equal?)
 
 (define (list-ref items n)
   (if (= n 0)
@@ -58,3 +58,16 @@
   (if (or (null? fnlist) (null? arglist))
       null
       (cons ((car fnlist) (car arglist)) (listmap (cdr fnlist) (cdr arglist)))))
+
+(define (list-equal? l1 l2)
+  (cond ((and (null? l1) (null? l2)) #t)
+        ((or (null? l1) (null? l2)) #f)
+        (else (let ((f1 (car l1))
+                    (f2 (car l2))
+                    (r1 (cdr l1))
+                    (r2 (cdr l2)))
+                (cond ((and (list? f1) (list? f2)) (and (list-equal? f1 f2) (list-equal? r1 r2)))
+                      ((or (list? f1) (list? f2)) #f)
+                      ((and (pair? f1) (pair? f2)) (and (equal? (car f1) (car f2)) (equal? (cdr f1) (cdr f2)) (list-equal? r1 r2)))
+                      ((or (pair? f1) (pair? f2)) #f)
+                      (else (and (equal? f1 f2) (list-equal? r1 r2))))))))

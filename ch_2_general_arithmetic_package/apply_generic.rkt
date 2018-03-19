@@ -1,13 +1,13 @@
 #lang racket
-(require "ch_2_type_tag_helpers.rkt")
-(require "ch_2_hash_ops.rkt")
+(require "type_tag_helpers.rkt")
+(require "hash_ops.rkt")
 (require "../ch_2_list_operations.rkt")
-(require "ch_2_type_tower.rkt")
+(require "type_tower.rkt")
 
-(provide apply-generic-op raise project drop)
+(provide apply-generic)
 
 (define (equ? x y)
-  (apply-generic-op 'equ? x y))
+  (apply-generic 'equ? x y))
 
 ; ex 2.83
 (define (raise x)
@@ -33,20 +33,22 @@
         (if (equ? x x-rp) (drop x-p) x))))
 
 ; ex 2.84
-(define (apply-generic-op op . args)
+(define (apply-generic op . args)
   (let* ((type-tags (map type-tag args))
          (proc (get op type-tags)))
       (if proc
           (let ((ans (apply proc (map contents args))))
-            (if (or (symbol? ans) (eq? #t ans) (eq? #f ans))
-                ans
-                (drop ans))) ; ex 2.85
+            ans)
+            ; ex 2.85
+            ;(if (or (symbol? ans) (eq? #t ans) (eq? #f ans))
+            ;    ans
+            ;    (drop ans)))
           (let* ((type-levels (map type-level type-tags))
                  (highest-type-level (apply max type-levels))
                  (lowest-type-level (apply min type-levels)))
             (if (= highest-type-level lowest-type-level)
-                (error "APPLY-GENERIC-OP -- no proc found" (list op args))
+                (error "APPLY-GENERIC -- no proc found" (list op args))
                 (let* ((levels-to-raise (map (lambda (level) (- highest-type-level level)) type-levels))
                        (raise-fns (map raise-n-times levels-to-raise))
                        (new-args (listmap raise-fns args)))
-                  (apply apply-generic-op (list op new-args))))))))
+                  (apply apply-generic (list op new-args))))))))

@@ -1,10 +1,10 @@
 #lang racket
-(require "ch_2_type_tag_helpers.rkt")
-(require "ch_2_hash_ops.rkt")
-(require "ch_2_apply_generic_op.rkt")
-(require "ch_2_rect_complex_number_package.rkt")
-(require "ch_2_polar_complex_number_package.rkt")
-(require "ch_2_general_arithmetic_ops.rkt")
+(require "apply_generic.rkt")
+(require "complex_numbers__polar.package.rkt")
+(require "complex_numbers__rectangular.package.rkt")
+(require "general_arithmetic_ops.rkt")
+(require "hash_ops.rkt")
+(require "type_tag_helpers.rkt")
 
 (provide make-complex-from-real-imag
          make-complex-from-mag-ang)
@@ -16,10 +16,10 @@
   (define (make-from-mag-ang r a)
     ((get 'make-from-mag-ang 'polar) r a))
 
-  (define (real-part z) (apply-generic-op 'real-part z))
-  (define (imag-part z) (apply-generic-op 'imag-part z))
-  (define (magnitude z) (apply-generic-op 'magnitude z))
-  (define (angle z) (apply-generic-op 'angle z))
+  (define (real-part z) (apply-generic 'real-part z))
+  (define (imag-part z) (apply-generic 'imag-part z))
+  (define (magnitude z) (apply-generic 'magnitude z))
+  (define (angle z) (apply-generic 'angle z))
 
   (define (add_c z1 z2)
     (make-from-real-imag (add (real-part z1) (real-part z2))
@@ -67,8 +67,11 @@
 
   ; ex 2.85
   (put 'project 'complex (get-coercion '(complex rational)))
+
+  ; ex 2.88
+  (put 'negate 'complex (lambda (z) (tag (negate z))))
   
-  'done)
+  'installed-complex-number-package)
 
 (install-complex-number-package)
 
