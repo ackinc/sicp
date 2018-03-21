@@ -13,6 +13,8 @@
   (define (make-from-mag-ang r a) (list r a))
   (define (make-from-real-imag x y) (list (squareroot (add (mul x x) (mul y y))) (arctan y x))) ; sqrt
 
+  (define (negate-polar z) (make-from-mag-ang (magnitude z) (+ (angle z) pi)))
+
   ; public interface
   (define (tag datum) (attach-tag 'polar datum))
   (put 'make-from-mag-ang 'polar (lambda (r a) (tag (make-from-mag-ang r a))))
@@ -22,6 +24,7 @@
   (put 'imag-part '(polar) imag-part)
   (put 'magnitude '(polar) magnitude)
   (put 'angle '(polar) angle)
+  (put 'negate '(polar) (lambda (z) (tag (negate-polar z))))
   'installed-polar-complex-numbers-package)
 
 (install-polar-complex-number-package)

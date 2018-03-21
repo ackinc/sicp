@@ -106,7 +106,8 @@
                                         (mul-term-by-all-terms new-term L2)))
                                       L2)))
                   (list (adjoin-term new-term (car rest-of-result)) (cadr rest-of-result)))))))
-                  
+  (define (quotient-terms tl1 tl2) (car (div-terms tl1 tl2)))
+  (define (remainder-terms tl1 tl2) (cadr (div-terms tl1 tl2)))
   (define (div-poly p1 p2)
     (let ((v1 (variable p1))
           (v2 (variable p2)))
@@ -114,9 +115,10 @@
           (let* ((div-result (div-terms (term-list p1) (term-list p2)))
                  (q (car div-result))
                  (r (cadr div-result)))
-            (cons (make-poly v1 q) (make-poly v1 r)))
+            (list (make-poly v1 q) (make-poly v1 r)))
           (error "DIV-POLY -- polynomials must have the same indeterminate" (list p1 p2)))))
 
+  ; equ?
   (define (equ-terms? tl1 tl2)
     (cond ((and (empty-termlist? tl1) (empty-termlist? tl2)) #t)
           ((or (empty-termlist? tl1) (empty-termlist? tl2)) #f)
@@ -128,7 +130,60 @@
   (define (equ?-poly p1 p2) (and (same-variable? (variable p1) (variable p2))
                                  (equ-terms? (term-list p1) (term-list p2))))
 
+  ; =zero?
   (define (=zero?-poly p) (empty-termlist? (term-list p)))
+
+  ; gcd
+  ; ex 2.96a
+  (define (pseudoremainder-terms tl1 tl2)
+    (let* ((o1 (order (first-term tl1)))
+           (ft2 (first-term tl2))
+           (o2 (order ft2))
+           (c2 (coeff ft2))
+           (integerizing-factor (expt c2 (+ 1 (- o1 o2))))
+           (ift (make-term 0 integerizing-factor)))
+      (cadr (div-terms (mul-term-by-all-terms ift tl1)
+                       tl2))))
+  
+  (define (gcd-terms tl1 tl2)
+    (define (helper L1 L2)
+      (if (empty-termlist? L2)
+          L1
+          (helper L2 (pseudoremainder-terms L1 L2))))
+    (define (coeffs-list L)
+      (if (empty-termlist? L)
+          null
+          (cons (coeff (first-term L))
+                (coeffs-list (rest-terms L)))))
+    (define (simplify-coeffs L)
+      (mul-term-by-all-terms (make-term 0 (/ 1 (apply gcd (coeffs-list L)))) L))
+    (simplify-coeffs (helper tl1 tl2)))
+  
+  (define (gcd-poly p1 p2)
+    (let ((v1 (variable p1))
+          (v2 (variable p2)))
+      (if (same-variable? v1 v2)
+          (make-poly v1 (gcd-terms (term-list p1) (term-list p2)))
+          (error "GCD-POLY -- polynomials must have the same indeterminate" (list p1 p2)))))
+
+  ; ex 2.97
+  (define (reduce-terms L1 L2)
+    (define (degree L) (order (first-term L)))
+    (let* ((g-c-d (gcd-terms L1 L2))
+           (integerizing-factor (expt (coeff (first-term g-c-d)) (+ 1 (- (max (degree L1) (degree L2)) (degree g-c-d)))))
+           (ift (make-term 0 integerizing-factor))
+           (newL1 (mul-term-by-all-terms ift L1))
+           (newL2 (mul-term-by-all-terms ift L2)))
+      (list (quotient-terms newL1 g-c-d)
+            (quotient-terms newL2 g-c-d))))
+
+  (define (reduce-poly p1 p2)
+    (let ((v1 (variable p1))
+          (v2 (variable p2)))
+      (if (same-variable? v1 v2)
+          (let ((result (reduce-terms (term-list p1) (term-list p2))))
+            (list (make-poly v1 (car result)) (make-poly v1 (cadr result))))
+          (error "REDUCE-POLY -- polynomials must have the same indeterminate" (list p1 p2)))))
 
   ; public interface
   (define (tag datum) (attach-tag 'polynomial datum))
@@ -139,13 +194,15 @@
   (put 'add '(polynomial polynomial) (lambda (p1 p2) (tag (add-poly p1 p2))))
   (put 'sub '(polynomial polynomial) (lambda (p1 p2) (tag (sub-poly p1 p2))))
   (put 'mul '(polynomial polynomial) (lambda (p1 p2) (tag (mul-poly p1 p2))))
-  (put 'div '(polynomial polynomial) (lambda (p1 p2)
-                                       (let ((result (div-poly p1 p2)))
-                                         (list (tag (car result)) (tag (cdr result))))))
+  (put 'div '(polynomial polynomial) (lambda (p1 p2) (map tag (div-poly p1 p2))))
 
   (put 'equ? '(polynomial polynomial) equ?-poly)
   (put '=zero? '(polynomial) =zero?-poly)
   (put 'negate '(polynomial) (lambda (p) (tag (negate-poly p))))
+
+  (put 'gcd '(polynomial polynomial) (lambda (p1 p2) (tag (gcd-poly p1 p2))))
+
+  (put 'reduce '(polynomial polynomial) (lambda (p1 p2) (map tag (reduce-poly p1 p2))))
 
   'installed-polynomials-package)
 

@@ -8,22 +8,29 @@
 (define (install-rational-number-package)
   ;internal procedures
 
-  ; make pre ex 2.93
-  (define (make n d)
-    (if (= d 0)
-        (error "Denom cannot be 0" n d)
-        (let ((n-abs (abs n))
-              (d-abs (abs d))
-              (pos-rat? (or (and (>= n 0) (> d 0))
-                            (and (< n 0) (< d 0))))
-              (g (gcd (abs n) (abs d))))
-          (list ((if pos-rat? + -) (/ n-abs g)) (/ d-abs g)))))
+  ; pre ex 2.93
+  ;(define (make n d)
+  ;  (if (= d 0)
+  ;      (error "Denom cannot be 0" n d)
+  ;      (let ((n-abs (abs n))
+  ;            (d-abs (abs d))
+  ;            (pos-rat? (or (and (>= n 0) (> d 0))
+  ;                          (and (< n 0) (< d 0))))
+  ;            (g (gcd (abs n) (abs d))))
+  ;        (list ((if pos-rat? + -) (/ n-abs g)) (/ d-abs g)))))
 
-  ; for ex 2.93
+  ; for ex 2.93 - not reducing rational to lowest terms
   ;(define (make n d)
   ;  (if (=zero? d)
   ;      (error "Denom cannot be zero" n d)
-  ;      (list n d)))
+  ;        (list n d)))
+  
+  ; ex 2.97 - reducing rational polynomials to lowest terms
+  (define (make n d)
+    (if (=zero? d)
+        (error "Denom cannot be zero" n d)
+        (let ((result (reduce n d)))
+          (list (car result) (cadr result)))))
 
   (define (numer rat) (car rat))
   (define (denom rat) (cadr rat))
@@ -85,7 +92,7 @@
   (put 'raise '(rational) (lambda (rat) ((get-coercion '(rational complex)) rat)))
 
   ; ex 2.85
-  (put-coercion '(complex rational) (lambda (n) (tag (make ((get 'real-part 'complex) n) 1))))
+  (put-coercion '(complex rational) (lambda (n) (tag (make ((get 'real-part '(complex)) n) 1))))
   (put 'project '(rational) (get-coercion '(rational scheme-number)))
 
   ; ex 2.86

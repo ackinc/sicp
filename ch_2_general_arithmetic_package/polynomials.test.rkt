@@ -38,3 +38,12 @@
 (display "=zero?")(newline)
 (=zero? (make-polynomial 'x '()))
 (=zero? (add (make-polynomial 'x '(3 2 1)) (make-polynomial 'x '(-3 -2 -1))))
+
+(display "gcd")(newline)
+(list-equal? (greatest-common-divisor (make-polynomial 'x '(1 0 -1)) (make-polynomial 'x '(1 -2 1))) (make-polynomial 'x '(1 -1)))
+(list-equal? (greatest-common-divisor (make-polynomial 'x '(1 0 -1)) (make-polynomial 'x '(1 -1))) (make-polynomial 'x '(1 -1)))
+(list-equal? (greatest-common-divisor (make-polynomial 'x '(1 0 1)) (make-polynomial 'x '(1 1))) (make-polynomial 'x '(1)))
+
+(display "reduce")(newline)
+(list-equal? (reduce (make-polynomial 'x '(1 0 -1)) (make-polynomial 'x '(1 -1))) '((polynomial x dense 1 1) (polynomial x dense 1)))
+(list-equal? (reduce (make-polynomial 'x '(1 1)) (make-polynomial 'x '(1 -1))) '((polynomial x dense 1 1) (polynomial x dense 1 -1)))

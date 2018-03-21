@@ -8,7 +8,9 @@
          raise project
          sine cosine arctan
          squareroot
-         negate)
+         negate
+         greatest-common-divisor
+         reduce)
 
 (define (add x y) (apply-generic 'add x y))
 
@@ -46,3 +48,9 @@
 
 ; ex 2.88
 (define (negate x) (apply-generic 'negate x))
+
+; ex 2.94
+(define (greatest-common-divisor a b) (apply-generic 'gcd a b))
+
+; ex 2.97
+(define (reduce a b) (apply-generic 'reduce a b))

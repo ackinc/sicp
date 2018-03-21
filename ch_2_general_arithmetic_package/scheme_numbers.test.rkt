@@ -28,3 +28,8 @@
 (display "negate")(newline)
 (= (negate 0) 0)
 (= (negate 1) -1)
+
+(display "reduce")(newline)
+(list-equal? (reduce 9 4) '(9 4))
+(list-equal? (reduce 9 3) '(3 1))
+(list-equal? (reduce 36 24) '(3 2))

@@ -30,6 +30,14 @@
   ; ex 2.88
   (put 'negate '(scheme-number) (lambda (x) (* x -1)))
 
+  ; ex 2.94
+  (put 'gcd '(scheme-number scheme-number) gcd)
+
+  ; ex 2.97
+  (put 'reduce '(scheme-number scheme-number) (lambda (n1 n2)
+                                                (let ((g-c-d (gcd n1 n2)))
+                                                  (list (/ n1 g-c-d) (/ n2 g-c-d)))))
+
   'installed-scheme-numbers-package)
 
 (install-scheme-number-package)

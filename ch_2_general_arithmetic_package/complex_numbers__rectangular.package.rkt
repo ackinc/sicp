@@ -13,6 +13,8 @@
   (define (make-from-real-imag x y) (list x y))
   (define (make-from-mag-ang r a) (list (mul r (cosine a)) (mul r (sine a))))
 
+  (define (negate-rect z) (make-from-real-imag (negate (real-part z)) (negate (imag-part z))))
+
   (define (tag datum) (attach-tag 'rect datum))
   (put 'make-from-real-imag 'rect (lambda (x y) (tag (make-from-real-imag x y))))
   (put 'make-from-mag-ang 'rect (lambda (r a) (tag (make-from-mag-ang r a))))
@@ -21,6 +23,7 @@
   (put 'imag-part '(rect) imag-part)
   (put 'magnitude '(rect) magnitude)
   (put 'angle '(rect) angle)
+  (put 'negate '(rect) (lambda (z) (tag (negate-rect z))))
   'installed-rectangular-complex-numbers-package)
 
 (install-rectangular-complex-number-package)
