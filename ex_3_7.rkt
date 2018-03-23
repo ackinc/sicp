@@ -1,0 +1,71 @@
+#lang racket
+(define (call-the-cops) (display "The cops have been alerted.")(newline))
+
+(define (make-account balance password)
+  (define passwords (list password))
+  (define incorrect-password-attempts 0)
+
+  (define (withdraw amount)
+    (if (<= amount balance)
+        (begin (set! balance (- balance amount))
+               balance)
+        "Insufficient funds"))
+  (define (deposit amount)
+    (set! balance (+ balance amount))
+    balance)
+  
+  (define (inc-ipa) (set! incorrect-password-attempts (+ incorrect-password-attempts 1)))
+  (define (reset-ipa) (set! incorrect-password-attempts 0))
+  (define (incorrect-password-handler x)
+    (if (>= incorrect-password-attempts 7)
+        (call-the-cops)
+        (inc-ipa))
+    "Incorrect password")
+  (define (check-password pwd) (memq pwd passwords))
+  (define (add-password pwd) (set! passwords (cons pwd passwords)))
+
+  (define (dispatch pwd m)
+    (if (not (check-password pwd))
+        incorrect-password-handler
+        (begin (reset-ipa)
+               (cond ((eq? m 'withdraw) withdraw)
+                     ((eq? m 'deposit) deposit)
+                     ((eq? m 'add-password) (lambda (x)
+                                              (add-password x)
+                                              dispatch))
+                     (else (lambda (x) "Invalid message"))))))
+  dispatch)
+
+(define (make-joint acc pwd new-pwd)
+  ((acc pwd 'add-password) new-pwd))
+
+; TESTS
+(display "Basic tests")(newline)
+(define acc (make-account 200 'anirudh))
+(eq? ((acc 'a 'withdrawal) 50) "Incorrect password")
+(eq? ((acc 'anirudh 'withdrawal) 50) "Invalid message")
+(eq? ((acc 'anirudh 'withdraw) 500) "Insufficient funds")
+(eq? ((acc 'anirudh 'withdraw) 50) 150)
+(eq? ((acc 'anirudh 'deposit) 50) 200)
+
+(display "7 incorrect attempts in a row")(newline)
+(eq? ((acc 'a 'withdrawal) 50) "Incorrect password")
+(eq? ((acc 'a 'withdrawal) 50) "Incorrect password")
+(eq? ((acc 'a 'withdrawal) 50) "Incorrect password")
+(eq? ((acc 'a 'withdrawal) 50) "Incorrect password")
+(eq? ((acc 'a 'withdrawal) 50) "Incorrect password")
+(eq? ((acc 'a 'withdrawal) 50) "Incorrect password")
+(eq? ((acc 'a 'withdrawal) 50) "Incorrect password")
+
+(display "This next attempt will bring the cops")(newline)
+(eq? ((acc 'a 'withdrawal) 50) "Incorrect password")
+
+(display "This will reset incorrect-password-attempts to 0")(newline)
+(eq? ((acc 'anirudh 'deposit) 50) 250)
+
+(display "Testing make-joint")(newline)
+(define acc2 (make-joint acc 'anirudh 'ani))
+(eq? ((acc2 'ani 'deposit) 150) 400)
+(eq? ((acc2 'ani 'withdraw) 5) 395)
+(eq? ((acc 'anirudh 'deposit) 50) 445)
+(eq? ((acc 'anirudh 'withdraw) 5) 440)
