@@ -1,0 +1,51 @@
+#lang racket
+(define (make-queue) (mcons null null))
+(define (front-ptr q) (mcar q))
+(define (rear-ptr q) (mcdr q))
+(define (set-front-ptr! q node) (set-mcar! q node))
+(define (set-rear-ptr! q node) (set-mcdr! q node))
+
+(define (empty-queue? q) (null? (front-ptr q)))
+
+(define (front-queue q)
+  (if (empty-queue? q)
+      (error "front-queue -- called on empty queue")
+      (mcar (front-ptr q))))
+
+(define (insert-queue! q item)
+  (let ((node (mcons item null)))
+    (if (empty-queue? q)
+        (begin (set-front-ptr! q node))
+        (begin (set-mcdr! (rear-ptr q) node)))
+    (set-rear-ptr! q node)
+    q))
+
+(define (delete-queue! q)
+  (cond ((empty-queue? q) (error "delete-queue! -- called on empty queue"))
+        (else (let ((item (front-queue q)))
+                (cond ((eq? (front-ptr q) (rear-ptr q)) (begin (set-front-ptr! q null)
+                                                               (set-rear-ptr! q null)))
+                      (else (set-front-ptr! q (mcdr (front-ptr q)))))
+                q))))
+
+; ex 3.21
+(define (print-queue q)
+  (define (helper ptr)
+    (if (null? ptr)
+        (newline)
+        (begin (display (mcar ptr))
+               (display " ")
+               (helper (mcdr ptr)))))
+  (helper (front-ptr q)))
+
+; TESTS
+(define q (make-queue))
+(empty-queue? q)
+(insert-queue! q 2)
+(insert-queue! q 3)
+(print-queue q)
+(eq? (front-queue q) 2)
+(delete-queue! q)
+(eq? (front-queue q) 3)
+(delete-queue! q)
+(empty-queue? q)
