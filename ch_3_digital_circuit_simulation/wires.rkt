@@ -1,0 +1,23 @@
+#lang racket
+(require "call_each.rkt")
+(provide make-wire get-signal set-signal! add-action!)
+
+(define (make-wire)
+  (let ((signal 0)
+        (actions null))
+    (define (set-signal! x)
+      (if (not (= x signal))
+          (begin (set! signal x)
+                 (call-each actions))
+          'do-nothing))
+    (define (add-action! proc)
+      (set! actions (cons proc actions))
+      (proc))
+    (lambda (m) (cond ((eq? m 'get-signal) signal)
+                      ((eq? m 'set-signal!) set-signal!)
+                      ((eq? m 'add-action!) add-action!)
+                      (else (error "wire dispatch -- unrecognized message" m))))))
+
+(define (get-signal wire) (wire 'get-signal))
+(define (set-signal! wire x) ((wire 'set-signal!) x))
+(define (add-action! wire action) ((wire 'add-action!) action))
