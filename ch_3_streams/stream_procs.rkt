@@ -1,7 +1,7 @@
 #lang racket
 (require "delayed_eval.rkt")
 
-(provide cons-stream stream-car stream-cdr stream-null? the-empty-stream
+(provide cons-stream stream-car stream-cdr stream-null? the-empty-stream make-stream-from-list
          stream-enumerate-interval stream-for-each stream-filter stream-map stream-ref
          add-streams mul-streams scale-stream
          merge merge-weighted
@@ -13,6 +13,11 @@
 
 (define (stream-null? s) (null? s))
 (define the-empty-stream null)
+
+(define (make-stream-from-list L)
+  (if (null? L)
+      the-empty-stream
+      (cons-stream (car L) (make-stream-from-list (cdr L)))))
 
 (define (stream-enumerate-interval a b)
   (if (> a b)
@@ -66,7 +71,7 @@
                       (else (cons-stream s2car (merge-weighted s1 (stream-cdr s2) weight))))))))
 
 (define (display-stream s n)
-  (if (= n 0)
+  (if (or (= n 0) (stream-null? s))
       'done
       (begin
         (display (stream-car s))
