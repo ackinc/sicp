@@ -15,4 +15,4 @@
 (define (square x) (* x x))
 (define (in-unit-circle? x y) (<= (+ (square x) (square y)) 1))
 (define (estimate-pi trials) (estimate-integral in-unit-circle? -1.0 1.0 -1.0 1.0 trials))
-(estimate-pi 10000)
+(estimate-pi 20000)
